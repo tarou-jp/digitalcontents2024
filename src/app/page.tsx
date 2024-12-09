@@ -4,7 +4,12 @@ import React, { useEffect, useState } from "react";
 import ImagePanel from "./components/ImagePanel";
 import ChatPanel from "./components/ChatPanel";
 import { useChatAndImage } from "./hooks/useChatAndImage";
-import { initializeGame, getProgress, UserProgress } from "@/utils/localStrage";
+import {
+  initializeGame,
+  getProgress,
+  UserProgress,
+  resetGame,
+} from "@/utils/localStrage";
 
 export default function Home() {
   const { isLoading, sendMessageAndGenerateImage } = useChatAndImage();
@@ -46,29 +51,120 @@ export default function Home() {
     }
   };
 
-  const editScenario = () => {
-    alert("シナリオ編集機能は現在準備中です。");
+  const handleGameEnd = () => {
+    if (isGameStarted) {
+      // ゲームを終了し、ローカルストレージをリセット
+      resetGame();
+      setIsGameStarted(false);
+      setProgress(null);
+    }
   };
 
-  if (isGameStarted) {
-    // ゲームが開始されている場合の表示
-    return (
-      <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
-        <ImagePanel
-          imageUrl={progress?.generatedImages.at(-1) || null}
-          isLoading={isLoading}
-        />
-        <ChatPanel
-          messages={progress?.history || []}
-          sendMessage={handleSendMessage}
-          isLoading={isLoading}
-        />
-      </div>
+  const editScenario = () => {
+    alert(
+      "シナリオ編集機能は現在準備中です。好きなギャルゲー作れるようにしようとしたけど、時間なかったです、"
     );
-  }
+  };
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen((prev) => !prev);
+  };
 
   // ホーム画面の表示
-  return (
+  return isGameStarted ? (
+    <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
+      {/* 右上の3点リーダー */}
+      {/* 右上の3点リーダー */}
+      <div
+        style={{
+          position: "absolute",
+          top: "15px",
+          right: "15px",
+          zIndex: 1000,
+          width: "50px",
+          height: "50px",
+          backgroundColor: "#4CAF50", // 緑色でギャルゲーの柔らかい雰囲気
+          borderRadius: "50%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          transition: "background-color 0.3s ease",
+        }}
+        onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#45A049")}
+        onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#4CAF50")}
+      >
+        <button
+          onClick={toggleMenu}
+          style={{
+            background: "none",
+            height: "100%",
+            width: "100%",
+            border: "none",
+            fontSize: "24px",
+            cursor: "pointer",
+            color: "#fff",
+          }}
+        >
+          ⋮
+        </button>
+
+        {/* 小さなモーダル */}
+        {isMenuOpen && (
+          <div
+            style={{
+              position: "absolute",
+              top: "60px", // 3点リーダーのボタンの下に表示
+              right: "0px", // ボタンの右端に揃える
+              padding: "10px",
+              backgroundColor: "#FFF",
+              borderRadius: "8px",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+              zIndex: 1001,
+              width: "300px", // 幅を固定
+              textAlign: "center", // 中央揃え
+            }}
+          >
+            <button
+              onClick={handleGameEnd}
+              style={{
+                backgroundColor: "#FF6F61",
+                color: "#FFF",
+                border: "none",
+                borderRadius: "8px",
+                padding: "8px 16px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                fontSize: "14px",
+                transition: "all 0.3s ease",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = "#FF4A3D";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = "#FF6F61";
+              }}
+            >
+              ゲームを終了
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* メインコンテンツ */}
+      <ImagePanel
+        imageUrl={progress?.generatedImages.at(-1) || null}
+        isLoading={isLoading}
+      />
+      <ChatPanel
+        messages={progress?.history || []}
+        sendMessage={handleSendMessage}
+        isLoading={isLoading}
+      />
+    </div>
+  ) : (
     <div
       style={{
         position: "relative",

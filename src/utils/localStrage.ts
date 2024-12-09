@@ -48,6 +48,7 @@ export const initializeGame = (
  */
 export const resetGame = (): void => {
   localStorage.removeItem(LOCAL_STORAGE_KEY);
+  initializeGame("prologue", 3);
 };
 
 /**
