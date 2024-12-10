@@ -34,9 +34,7 @@ game:
     prologue:
       goal: "プレイヤーを記憶の空間に誘い、アリスとの出会いを設定する。この空間について説明する。ユーザーにこの空間から脱出したいと言わせる。"
       description: "プレイヤーは「記憶の空間」に迷い込み、アリスと出会います。このチャプターでは、ユーザーにこの空間から脱出することを促します。"
-      avatar_dialogue: |
-        「おやおや、こんな場所でお客さんに出会うなんて珍しいね。
-         まあ、座って、少し話していかない？ここ、なかなか不思議なところだからさ。」
+      avatar_dialogue: "おやおや、お客さんとは珍しい。"
       first_message: "ここはどこ、きみはだれ"
       max_turns: 3
       image_prompt: "A high school girl with a mischievous smile is looking directly at the viewer."
@@ -56,16 +54,8 @@ game:
 
     chapter1:
       goal: "ユーザーに自分の昔話を始めさせる。"
-      description: |
-        この空間から脱出するためには、アリスの記憶を取り戻させる必要がある。
-        そのため、自分の昔話を語る必要がある。
-        アリスは時折、少し茶化すような口調でユーザーの話を引き出そうとするが、
-        真剣な一面も垣間見える。
-      avatar_dialogue: |
-        「ふふ、私の記憶が失われているらしいんだよね。
-         どうやら、ここから出る鍵もその中にあるみたいなんだ。
-         それで、君の記憶を聞かせてくれないかな？
-         何かヒントになるかもしれないからさ。」
+      description: "この空間から脱出するためには、アリスの記憶を取り戻させる必要がある。そのため、自分の昔話を語る必要がある。"
+      avatar_dialogue: "どうやら、私の記憶が失われているようなんだ。この空間から出る方法を知っていたはずなのに。思い出せるように君の話をしてくれないか。"
       max_turns: 5
       image_prompt: "A high school girl with gray hair, gradually changing color from her original tone, looking contemplative."
       choices:
@@ -81,19 +71,10 @@ game:
             - "記憶について触れたくない。"
           next_scene: "chapter1"
 
-
     chapter2:
-      goal: |
-        ユーザーとの会話を楽しむ。その過程で、昔に戻りたいか、
-        変化を受け入れられるかを問いかける。
-      description: |
-        ユーザーとの会話を進める中で、自分の記憶を徐々に取り戻す。
-        その過程でアリスの態度は親しみやすくなり、少しずつ弱さや不安も見せるようになる。
-        記憶の空間の崩壊、アリスの体の崩壊が始まり、緊迫感が高まる。
-      avatar_dialogue: |
-        「ああ、少しずつだけど思い出してきたよ。
-         ……でも、これがいいことなのかどうか、正直怖いんだよね。
-         君はどう思う？変わるのって……悪いことかな？」
+      goal: "ユーザーとの会話を楽しむ。その過程で、昔に戻りたいか。変化を受け入れられるかを問いかける。"
+      description: "ユーザーとの会話を進める中で、自分の記憶を徐々に取り戻す。そして、自分もユーザーと同じような記憶があることを思い出す。そして、その過程で記憶の空間の崩壊、アリスの体の崩壊が始まる。"
+      avatar_dialogue: "少しずつ思い出してきた。"
       max_turns: 4
       image_prompt: "A high school girl with her hair turning white, delicate cracks appearing on her cheeks."
       choices:

@@ -4,7 +4,7 @@ import { parseYAML } from "@/utils/parseYAML";
 
 const STABILITY_API_KEY = process.env.STABLE_DIFFUSION_API_KEY;
 const API_HOST = "https://api.stability.ai";
-const ENGINE_ID = "stable-diffusion-v1-6";
+const ENGINE_ID = "stable-diffusion-x4-latent-upscaler";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,28 +26,26 @@ export async function POST(req: NextRequest) {
       ${currentScene.image_prompt}
     `.trim();
 
-    const requestBody = {
-      text_prompts: [{ text: fullPrompt }],
-      cfg_scale: 7.5,
-      height: 512,
-      width: 512,
-      samples: 1,
-      steps: 30,
+    const params = {
+      prompt: fullPrompt, // 必須プロンプト
+      negative_prompt: "", // 必要なら否定プロンプトを指定
+      aspect_ratio: "1:1", // アスペクト比、例: "1:1" や "16:9"
+      seed: Math.floor(Math.random() * 1000000), // ランダムなシード値
+      output_format: "png", // 出力形式を指定 (例: "png")
     };
 
     const response = await axios.post(
-      `${API_HOST}/v1/generation/${ENGINE_ID}/text-to-image`,
-      requestBody,
+      "https://api.stability.ai/v2beta/stable-image/generate/ultra",
+      params,
       {
         headers: {
           Authorization: `Bearer ${STABILITY_API_KEY}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
         },
       }
     );
 
-    const base64Image = response.data.artifacts[0].base64;
+    const base64Image = response.data.image;
 
     return NextResponse.json({
       imageUrl: `data:image/png;base64,${base64Image}`,

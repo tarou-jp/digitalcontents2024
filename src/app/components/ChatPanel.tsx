@@ -72,8 +72,18 @@ export default function ChatPanel({
           marginBottom: 20,
           overflowY: "auto",
           overflowX: "hidden",
+          msOverflowStyle: "none",
+          scrollbarWidth: "none",
         }}
       >
+        <style>
+          {`
+          /* スクロールバーを完全に非表示にする */
+          div::-webkit-scrollbar {
+            display: none; /* Chrome、Safari用 */
+          }
+        `}
+        </style>
         {localMessages.map((msg, index) => (
           <BubbleMessage key={index} sender={msg.sender} text={msg.text} />
         ))}
