@@ -3,8 +3,6 @@ import axios from "axios";
 import { parseYAML } from "@/utils/parseYAML";
 
 const STABILITY_API_KEY = process.env.STABLE_DIFFUSION_API_KEY;
-const API_HOST = "https://api.stability.ai";
-const ENGINE_ID = "stable-diffusion-x4-latent-upscaler";
 
 export async function POST(req: NextRequest) {
   try {
