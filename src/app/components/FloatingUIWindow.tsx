@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -10,37 +10,35 @@ import {
   MenuItem,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { Message } from "@/types/types";
+import { UserProgress } from "@/utils/localStrage";
 
 type Props = {
-  messages: Message[]; // 全メッセージを受け取る
+  progress: UserProgress; // ゲーム進行状況を受け取る
   sendMessage: (input: string) => Promise<void>;
-  isLoading: boolean; // ローディング状態
-  handleGameEnd: () => void; // ゲーム終了処理
+  isLoading: boolean;
+  handleGameEnd: () => void;
+  currentTurn: number;
+  handleSelectTurn: (turn: number) => void; // ターン選択処理
 };
 
-export default function AliceResponseWindow({
-  messages,
+export default function FloatingUIWindow({
+  progress,
   sendMessage,
   isLoading,
   handleGameEnd,
+  currentTurn,
+  handleSelectTurn,
 }: Props) {
   const [input, setInput] = useState<string>("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorEl);
 
-  // アリスの最新のメッセージを取得
-  const aliceMessages = messages.filter((msg) => msg.sender === "bot");
-  const latestMessage = aliceMessages.at(-1)?.text || "待機中...";
-
-  // メッセージ送信ハンドラー
   const handleSendMessage = async () => {
     if (!input.trim()) return;
     await sendMessage(input);
     setInput("");
   };
 
-  // メニューハンドラー
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -54,9 +52,12 @@ export default function AliceResponseWindow({
     handleMenuClose();
   };
 
+  useEffect(() => {
+    console.log(progress.currentChapter);
+  }, []);
+
   return (
     <>
-      {/* 3点リーダーメニュー */}
       <Box
         sx={{
           position: "absolute",
@@ -90,11 +91,30 @@ export default function AliceResponseWindow({
             horizontal: "right",
           }}
         >
+          <MenuItem
+            onClick={() => {
+              handleSelectTurn(Math.max(0, currentTurn - 1));
+              handleMenuClose();
+            }}
+            disabled={currentTurn === 0}
+          >
+            前の会話
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              handleSelectTurn(
+                Math.min(progress.history.length - 1, currentTurn + 1)
+              );
+              handleMenuClose();
+            }}
+            disabled={currentTurn * 2 === progress.history.length - 1}
+          >
+            次の会話
+          </MenuItem>
           <MenuItem onClick={handleGameEndClick}>ゲームを終了</MenuItem>
         </Menu>
       </Box>
 
-      {/* アリスのメッセージウィンドウ */}
       <Box
         sx={{
           position: "absolute",
@@ -113,12 +133,11 @@ export default function AliceResponseWindow({
           lineHeight: 1.6,
         }}
       >
-        {/* アリスのメッセージ */}
         <Box>
-          <Typography variant="body1">{latestMessage}</Typography>
+          <Typography variant="body1">
+            {progress.history[currentTurn * 2]?.text || "待機中..."}
+          </Typography>
         </Box>
-
-        {/* ローディング中のインジケータ */}
         {isLoading && (
           <Box
             display="flex"
@@ -126,7 +145,7 @@ export default function AliceResponseWindow({
             alignItems="center"
             mt={2}
           >
-            <CircularProgress size={24} sx={{ color: "#bbb" }} />
+            <CircularProgress size={24} sx={{ color: "#bbb", mr: 1 }} />
             <Typography variant="body2" color="text.primary">
               考え中...
             </Typography>
@@ -135,44 +154,69 @@ export default function AliceResponseWindow({
       </Box>
 
       {/* ユーザー入力ウィンドウ */}
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: "2%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "80%",
-          maxWidth: "800px",
-        }}
-      >
-        <Box display="flex" alignItems="center" gap={2}>
-          <TextField
-            fullWidth
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="メッセージを入力..."
-            variant="outlined"
-            size="small"
-            disabled={isLoading} // ローディング中は入力不可
-            sx={{
-              backgroundColor: "white",
-              borderRadius: 1,
-            }}
-          />
+      {progress.currentChapter !== "finish" ? (
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "2%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "80%",
+            maxWidth: "800px",
+          }}
+        >
+          <Box display="flex" alignItems="center" gap={2}>
+            <TextField
+              fullWidth
+              value={
+                currentTurn * 2 === progress.history.length - 1
+                  ? input
+                  : progress.history[currentTurn * 2 + 1]?.text || ""
+              }
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="メッセージを入力..."
+              variant="outlined"
+              size="small"
+              disabled={currentTurn * 2 !== progress.history.length - 1}
+              sx={{ backgroundColor: "white", borderRadius: 1 }}
+            />
+            <Button
+              onClick={handleSendMessage}
+              variant="contained"
+              color="primary"
+              disabled={
+                isLoading ||
+                !input.trim() ||
+                currentTurn * 2 !== progress.history.length - 1
+              }
+              sx={{ fontWeight: "bold", boxShadow: 2 }}
+            >
+              送信
+            </Button>
+          </Box>
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "2%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "80%",
+            maxWidth: "800px",
+            textAlign: "center",
+          }}
+        >
           <Button
-            onClick={handleSendMessage}
+            onClick={handleGameEnd}
             variant="contained"
-            color="primary"
-            disabled={isLoading || !input.trim()}
-            sx={{
-              fontWeight: "bold",
-              boxShadow: 2,
-            }}
+            color="error"
+            sx={{ fontWeight: "bold", boxShadow: 2 }}
           >
-            送信
+            ゲームを終了
           </Button>
         </Box>
-      </Box>
+      )}
     </>
   );
 }

@@ -1,12 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { Message } from "@/types/types";
-import {
-  getProgress,
-  saveProgress,
-  addMessageToHistory,
-  UserProgress,
-} from "@/utils/localStrage";
+import { getProgress, saveProgress, UserProgress } from "@/utils/localStrage";
 
 export function useChatAndImage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -17,7 +12,7 @@ export function useChatAndImage() {
     if (isLoading) return { progress: null, success: false };
     setIsLoading(true);
 
-    let progress = getProgress();
+    const progress = getProgress();
 
     if (!progress) {
       console.error("進行状況の初期化に失敗しました。");
@@ -43,6 +38,7 @@ export function useChatAndImage() {
             currentChapter: progress.currentChapter,
             remainingTurns: progress.remainingTurns,
             history: progress.history,
+            generatedImages: progress.generatedImages,
           },
         }),
         axios.post("/api/generateImage", {

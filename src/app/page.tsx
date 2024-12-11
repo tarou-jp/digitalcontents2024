@@ -44,6 +44,7 @@ export default function Home() {
 
     if (success && progress) {
       setProgress(progress);
+      setCurrentTurn((prevTurn) => prevTurn + 1);
     } else {
       console.error("メッセージ送信または画像生成に失敗しました。");
     }
@@ -61,6 +62,14 @@ export default function Home() {
     );
   };
 
+  const [currentTurn, setCurrentTurn] = useState<number>(0);
+
+  const handleSelectTurn = (turn: number) => {
+    console.log(progress);
+    console.log(turn);
+    setCurrentTurn(turn);
+  };
+
   return (
     <Box
       sx={{
@@ -69,17 +78,19 @@ export default function Home() {
         width: "100vw",
       }}
     >
-      {isGameStarted ? (
+      {isGameStarted && progress ? (
         <Box sx={{ display: "flex", position: "relative", width: "100%" }}>
           <ImagePanel
-            imageUrl={progress?.generatedImages.at(-1) || null}
+            imageUrl={progress?.generatedImages[currentTurn] || null}
             isLoading={isLoading}
           />
           <FloatingUIWindow
-            messages={progress?.history || []}
+            progress={progress}
             sendMessage={handleSendMessage}
             isLoading={isLoading}
             handleGameEnd={handleGameEnd}
+            currentTurn={currentTurn}
+            handleSelectTurn={handleSelectTurn}
           />
         </Box>
       ) : !isLoading ? (

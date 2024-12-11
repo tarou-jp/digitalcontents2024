@@ -136,6 +136,7 @@ export async function POST(req: NextRequest) {
       currentChapter: newChapter,
       remainingTurns: newRemainingTurns,
       history: [...progress.history, { sender: "bot", text: aiOutput.serif }],
+      generatedImages: progress.generatedImages,
     },
   });
 }
