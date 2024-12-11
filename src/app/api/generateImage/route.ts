@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       seed: Math.floor(Math.random() * 1000000), // ランダムなシード値
       output_format: "png", // 出力形式を指定 (例: "png")
     };
+    console.log("STABILITY_API_KEY:", process.env.STABLE_DIFFUSION_API_KEY);
 
     const response = await axios.post(
       "https://api.stability.ai/v2beta/stable-image/generate/ultra",
