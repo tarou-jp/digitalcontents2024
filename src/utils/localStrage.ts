@@ -4,7 +4,7 @@ export interface UserProgress {
   currentChapter: string; // 現在のチャプター名
   remainingTurns: number; // 現在のチャプターの残りターン数
   history: Message[];
-  generatedImages: string[];
+  generatedImage: string;
 }
 
 const LOCAL_STORAGE_KEY = "gameProgress";
@@ -38,7 +38,7 @@ export const initializeGame = (
     currentChapter: initialChapter,
     remainingTurns: initialTurns,
     history: [],
-    generatedImages: [],
+    generatedImage: "",
   };
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialProgress));
 };
@@ -105,7 +105,7 @@ export const addMessageToHistory = (message: Message): void => {
 export const addImageToHistory = (imageUrl: string): void => {
   const progress = getProgress();
   if (progress) {
-    progress.generatedImages.push(imageUrl);
+    progress.generatedImage = imageUrl;
     saveProgress(progress);
   }
 };

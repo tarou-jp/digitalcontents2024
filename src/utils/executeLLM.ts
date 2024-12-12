@@ -28,7 +28,10 @@ export const executeLLM = async ({
       ...history.map(
         (msg): LLMMessage => ({
           role: msg.sender === "user" ? "user" : "assistant",
-          content: msg.text,
+          content:
+            msg.sender === "bot"
+              ? `{ "serif": "${msg.text}", "next_scene": "" }`
+              : msg.text,
         })
       ),
       { role: "user", content: prompt },

@@ -62,20 +62,20 @@ export async function POST(req: NextRequest) {
     .join("\n");
 
   const systemMessage = `
-    ゲームタイトル: ${gameData.game.title}
     ジャンル: ${gameData.game.genre}
     テーマ: ${gameData.game.thema}
     現在のチャプター: ${progress.currentChapter}
     残りターン数: ${progress.remainingTurns}
     チャプターのゴール: ${currentScene.goal}
     チャプターの説明: ${currentScene.description}
+    
     キャラクター情報:
       - 名前: ${gameData.game.characters.avatar.name}
+      - 役割: ${gameData.game.characters.avatar.role}
       - 性格: ${gameData.game.characters.avatar.personality}
-      - 設定: ${gameData.game.characters.avatar.background}
-    ストーリー設定:
-      - 空間説明 ${gameData.game.settings.main_location.description}
-      - 空間の見た目 ${gameData.game.settings.main_location.visual_style}
+      - 語口調: ${gameData.game.characters.avatar.dialogue_style}
+      - 発話例: ${gameData.game.characters.avatar.sample_dialogues}
+
     プレイヤーの選択肢:
       ${formattedChoices}
     禁止事項:
@@ -85,12 +85,17 @@ export async function POST(req: NextRequest) {
     プレイヤーの選択肢に基づき、次の応答を生成してください。
 
     出力形式:
-    { "serif": "アリスの発言を記述してください。", "next_scene": "次のチャプター名を指定してください。" }
+    { "serif": "${gameData.game.characters.avatar.name}の発言を記述してください。", "next_scene": "次のチャプター名を指定してください。" }
 
-    - serif: アリスの発言
+    - serif: ${gameData.game.characters.avatar.name}の発言
     - next_scene: 次に進むチャプター名。進まない場合は空文字列 "" を指定。
 
     この出力形式は絶対守ってください。
+    
+    再度言いますが、以下の出力形式は絶対見守ってください。絶対にこれを破らないでください。
+    この形式以外で出力することは許しません。
+    { "serif": "${gameData.game.characters.avatar.name}の発言を記述してください。", "next_scene": "次のチャプター名を指定してください。" }
+
   `;
 
   console.log("プロンプト:", systemMessage);
@@ -121,14 +126,39 @@ export async function POST(req: NextRequest) {
   let newRemainingTurns = progress.remainingTurns;
 
   if (aiOutput.next_scene && aiOutput.next_scene !== "") {
-    const nextSceneData = gameData.game.story[aiOutput.next_scene];
-    if (nextSceneData) {
-      newChapter = aiOutput.next_scene;
-      newRemainingTurns = nextSceneData.max_turns || 3;
+    // 現在のチャプターに定義されている選択肢を取得
+    const validNextScenes = currentScene.choices.map(
+      (choice: { next_scene: string }) => choice.next_scene
+    );
+
+    // aiOutput.next_scene が現在の choices に存在し、かつ gameData に存在するか確認
+    if (validNextScenes.includes(aiOutput.next_scene)) {
+      console.log(validNextScenes);
+      const nextSceneData = gameData.game.story[aiOutput.next_scene];
+      if (nextSceneData) {
+        console.log(nextSceneData);
+
+        // next_scene が有効で、次のシーンが存在する場合
+        newChapter = aiOutput.next_scene;
+        newRemainingTurns = nextSceneData.max_turns || 3;
+      }
     }
-  } else {
-    // 次のシーンが指定されていない場合は現在のチャプターを維持
-    newRemainingTurns = Math.max(0, progress.remainingTurns - 1);
+  }
+
+  console.log(newChapter, progress.remainingTurns);
+
+  newRemainingTurns = Math.max(0, progress.remainingTurns - 1);
+
+  console.log("newRemaingTurns", newRemainingTurns);
+  if (newRemainingTurns === 0) {
+    // ターン数が 0 になった場合、現在の choices の最初の next_scene に遷移
+    if (currentScene.choices && currentScene.choices.length > 0) {
+      newChapter = currentScene.choices[0].next_scene;
+      const nextSceneData = gameData.game.story[newChapter];
+      newRemainingTurns = nextSceneData?.max_turns || 3;
+    } else {
+      console.error("次のシーンが定義されていません。");
+    }
   }
 
   return NextResponse.json({
@@ -136,7 +166,6 @@ export async function POST(req: NextRequest) {
       currentChapter: newChapter,
       remainingTurns: newRemainingTurns,
       history: [...progress.history, { sender: "bot", text: aiOutput.serif }],
-      generatedImages: progress.generatedImages,
     },
   });
 }

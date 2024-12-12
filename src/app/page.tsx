@@ -11,11 +11,13 @@ import {
   resetGame,
 } from "@/utils/localStrage";
 import FloatingUIWindow from "./components/FloatingUIWindow";
+import { useSnackbar } from "./SnackbarProvider";
 
 export default function Home() {
   const { isLoading, sendMessageAndGenerateImage } = useChatAndImage();
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [progress, setProgress] = useState<UserProgress | null>(null);
+  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     const initialProgress = getProgress();
@@ -33,12 +35,14 @@ export default function Home() {
 
     if (success && progress) {
       setProgress(progress);
+      setCurrentTurn(0);
       setIsGameStarted(true);
     } else {
-      console.error("ゲーム開始中にエラーが発生しました。");
+      showSnackbar("ゲーム開始中にエラーが発生しました。", "error"); // エラー表示
     }
   };
 
+  // メッセージ送信時のエラーハンドリング付き処理
   const handleSendMessage = async (input: string) => {
     const { progress, success } = await sendMessageAndGenerateImage(input);
 
@@ -46,7 +50,7 @@ export default function Home() {
       setProgress(progress);
       setCurrentTurn((prevTurn) => prevTurn + 1);
     } else {
-      console.error("メッセージ送信または画像生成に失敗しました。");
+      showSnackbar("生成に失敗しました。再度お試しください", "error"); // エラー表示
     }
   };
 
@@ -81,7 +85,7 @@ export default function Home() {
       {isGameStarted && progress ? (
         <Box sx={{ display: "flex", position: "relative", width: "100%" }}>
           <ImagePanel
-            imageUrl={progress?.generatedImages[currentTurn] || null}
+            imageUrl={progress?.generatedImage || null}
             isLoading={isLoading}
           />
           <FloatingUIWindow

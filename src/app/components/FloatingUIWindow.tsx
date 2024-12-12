@@ -111,6 +111,20 @@ export default function FloatingUIWindow({
           >
             次の会話
           </MenuItem>
+          <MenuItem
+            onClick={() => {
+              handleSelectTurn(
+                progress.history.length % 2 === 0
+                  ? progress.history.length / 2 - 1
+                  : (progress.history.length - 1) / 2
+              );
+              handleMenuClose();
+            }}
+            disabled={currentTurn * 2 === progress.history.length - 1}
+          >
+            最新の会話に戻る
+          </MenuItem>
+
           <MenuItem onClick={handleGameEndClick}>ゲームを終了</MenuItem>
         </Menu>
       </Box>
@@ -125,7 +139,7 @@ export default function FloatingUIWindow({
           maxWidth: "800px",
           backgroundColor: "rgba(0, 0, 0, 0.7)",
           borderRadius: 2,
-          p: 3,
+          p: 2,
           boxShadow: 3,
           color: "white",
           textAlign: "left",
@@ -146,7 +160,7 @@ export default function FloatingUIWindow({
             mt={2}
           >
             <CircularProgress size={24} sx={{ color: "#bbb", mr: 1 }} />
-            <Typography variant="body2" color="text.primary">
+            <Typography variant="body2" color="#fff">
               考え中...
             </Typography>
           </Box>
@@ -165,7 +179,7 @@ export default function FloatingUIWindow({
             maxWidth: "800px",
           }}
         >
-          <Box display="flex" alignItems="center" gap={2}>
+          <Box display="flex" alignItems="center" gap={1}>
             <TextField
               fullWidth
               value={
@@ -174,6 +188,16 @@ export default function FloatingUIWindow({
                   : progress.history[currentTurn * 2 + 1]?.text || ""
               }
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (
+                  e.key === "Enter" &&
+                  !isLoading &&
+                  input.trim() &&
+                  currentTurn * 2 === progress.history.length - 1
+                ) {
+                  handleSendMessage();
+                }
+              }}
               placeholder="メッセージを入力..."
               variant="outlined"
               size="small"

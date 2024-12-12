@@ -15,7 +15,6 @@ export function useChatAndImage() {
     const progress = getProgress();
 
     if (!progress) {
-      console.error("進行状況の初期化に失敗しました。");
       setIsLoading(false);
       return { progress: null, success: false };
     }
@@ -38,7 +37,6 @@ export function useChatAndImage() {
             currentChapter: progress.currentChapter,
             remainingTurns: progress.remainingTurns,
             history: progress.history,
-            generatedImages: progress.generatedImages,
           },
         }),
         axios.post("/api/generateImage", {
@@ -56,18 +54,13 @@ export function useChatAndImage() {
       const { progress: updatedProgress } = chatResponse.data;
 
       if (updatedProgress) {
-        updatedProgress.generatedImages = [
-          ...(updatedProgress.generatedImages || []),
-          imageUrl,
-        ];
+        updatedProgress.generatedImage = imageUrl;
         saveProgress(updatedProgress);
         return { progress: updatedProgress, success: true };
       } else {
-        console.error("更新された進行状況がありません。");
         return { progress: progress, success: true };
       }
-    } catch (error) {
-      console.error("エラー:", error);
+    } catch {
       return { progress: null, success: false };
     } finally {
       setIsLoading(false);

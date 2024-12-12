@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     console.log("STABILITY_API_KEY:", process.env.STABLE_DIFFUSION_API_KEY);
 
     const response = await axios.post(
-      "https://api.stability.ai/v2beta/stable-image/generate/ultra",
+      "https://api.stability.ai/v2beta/stable-image/generate/core",
       params,
       {
         headers: {
